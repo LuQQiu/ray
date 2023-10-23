@@ -63,16 +63,24 @@ def parse_args():
         default=False,
         help="Whether to configure Train with preserve_order flag.",
     )
+    parser.add_argument(
+        "--data-root",
+        default=None,
+        type=str,
+        help="Root directory for data. If not set, default paths will be used based on file type.",
+    )
+
     args = parser.parse_args()
 
-    if args.file_type == "image":
-        args.data_root = "s3://air-cuj-imagenet-1gb"
-    elif args.file_type == "parquet":
-        args.data_root = "s3://air-example-data-2/10G-image-data-synthetic-raw-parquet"
-    else:
-        raise Exception(
-            f"Unknown file type {args.file_type}; expected one of: ['image', 'parquet']"
-        )
+    if args.data_root is None:
+        if args.file_type == "image":
+            args.data_root = "s3://air-cuj-imagenet-1gb"
+        elif args.file_type == "parquet":
+            args.data_root = "s3://air-example-data-2/10G-image-data-synthetic-raw-parquet"
+        else:
+            raise Exception(
+                f"Unknown file type {args.file_type}; expected one of: ['image', 'parquet']"
+            )
     return args
 
 
