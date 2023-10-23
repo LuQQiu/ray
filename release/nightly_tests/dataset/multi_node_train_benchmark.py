@@ -69,6 +69,12 @@ def parse_args():
         type=str,
         help="Root directory for data. If not set, default paths will be used based on file type.",
     )
+    parser.add_argument(
+        "--use-gpu",
+        action="store_true",
+        default=False,
+        help="Whether to use GPU with TorchTrainer.",
+    )
 
     args = parser.parse_args()
 
@@ -154,7 +160,7 @@ if __name__ == "__main__":
     torch_trainer = TorchTrainer(
         train_loop_per_worker,
         datasets={"train": ray_dataset},
-        scaling_config=ScalingConfig(num_workers=args.num_workers, use_gpu=True),
+        scaling_config=ScalingConfig(num_workers=args.num_workers, use_gpu=args.use_gpu),
         dataset_config=ray.train.DataConfig(
             execution_options=options,
         ),
