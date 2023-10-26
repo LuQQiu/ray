@@ -129,6 +129,12 @@ def parse_args():
         default=False,
         help="Whether to cache output dataset (after preprocessing).",
     )
+    parser.add_argument(
+        "--object-store-memory",
+        default=-1,
+        type=int,
+        help="Object store memory. -1 means do not set user-specific object store memory.",
+    )
     args = parser.parse_args()
 
     ray.init(
@@ -403,6 +409,8 @@ def benchmark_code(
     # 3) Train TorchTrainer on processed data
     options = DataConfig.default_ingest_options()
     options.preserve_order = args.preserve_order
+    if args.object_store_memory != -1:
+        options.resource_limits.object_store_memory = args.object_store_memory
 
     torch_trainer = TorchTrainer(
         train_loop_per_worker,
@@ -419,20 +427,29 @@ def benchmark_code(
 
     result = torch_trainer.fit()
 
+
     # Report the average of per-epoch throughput, excluding the first epoch.
     epoch_tputs = []
     num_rows_per_epoch = sum(result.metrics["num_rows"])
-    for i in range(1, args.num_epochs):
+    for i in range(0, args.num_epochs):
         time_start_epoch_i, time_end_epoch_i = zip(*result.metrics[f"epoch_{i}_times"])
         runtime_epoch_i = max(time_end_epoch_i) - min(time_start_epoch_i)
         tput_epoch_i = num_rows_per_epoch / runtime_epoch_i
-        epoch_tputs.append(tput_epoch_i)
-    avg_per_epoch_tput = sum(epoch_tputs) / len(epoch_tputs)
-    print("Total num rows read per epoch:", num_rows_per_epoch, "images")
-    print("Averaged per-epoch throughput:", avg_per_epoch_tput, "img/s")
-    return {
-        BenchmarkMetric.THROUGHPUT.value: avg_per_epoch_tput,
-    }
+        if i == 0:
+            print("Epoch 0 throughput:", tput_epoch_i, "img/s")
+            if args.num_epochs == 1:
+                return {
+                    BenchmarkMetric.THROUGHPUT.value: tput_epoch_i,
+                }
+        else:
+            epoch_tputs.append(tput_epoch_i)
+    if args.num_epochs > 1:
+        avg_per_epoch_tput = sum(epoch_tputs) / len(epoch_tputs)
+        print("Total num rows read per epoch:", num_rows_per_epoch, "images")
+        print("Averaged per-epoch throughput:", avg_per_epoch_tput, "img/s")
+        return {
+            BenchmarkMetric.THROUGHPUT.value: avg_per_epoch_tput,
+        }
 
 
 if __name__ == "__main__":
