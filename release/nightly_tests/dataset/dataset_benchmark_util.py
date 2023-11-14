@@ -355,7 +355,7 @@ def get_test_prop_parquet_paths(num_workers, target_worker_gb):
     parquet_s3_dir = "s3://ai-ref-arch/imagenet-mini-parquet/val/100MB/"
     file_paths = []
     for fi in range(20):
-        file_paths.append(f"{parquet_s3_dir}imagenet_{fi:06}.parquet")
+        file_paths.append(f"{parquet_s3_dir}imagenet_{fi}.parquet")
     return file_paths
 
 
