@@ -351,6 +351,13 @@ def get_prop_parquet_paths(num_workers, target_worker_gb):
             break
     return file_paths
 
+def get_test_prop_parquet_paths(num_workers, target_worker_gb):
+    parquet_s3_dir = "s3://ai-ref-arch/imagenet-mini-parquet/val/100MB/"
+    file_paths = []
+    for fi in range(20):
+        file_paths.append(f"{parquet_s3_dir}imagenet_{fi:06}.parquet")
+    return file_paths
+
 
 def get_mosaic_epoch_size(num_workers, target_worker_gb=10):
     if target_worker_gb == -1:

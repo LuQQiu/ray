@@ -21,6 +21,7 @@ import torch
 
 from dataset_benchmark_util import (
     get_prop_parquet_paths,
+    get_test_prop_parquet_paths,
     get_prop_raw_image_paths,
     get_mosaic_epoch_size,
 )
@@ -144,7 +145,7 @@ def parse_args():
                 num_workers=args.num_workers, target_worker_gb=args.target_worker_gb
             )
         elif args.file_type == "parquet":
-            args.data_root = get_prop_parquet_paths(
+            args.data_root = get_test_prop_parquet_paths(
                 num_workers=args.num_workers, target_worker_gb=args.target_worker_gb
             )
         else:
