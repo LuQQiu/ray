@@ -87,7 +87,7 @@ def setup_alluxio(args):
     alluxio_kwargs = {}
     if args.alluxio_etcd_hosts and args.alluxio_worker_hosts:
         raise ValueError("Either etcd_host or worker_hosts should be provided, not both.")
-    if args.alluxio_etcd_host:
+    if args.alluxio_etcd_hosts:
         alluxio_kwargs['etcd_hosts'] = args.alluxio_etcd_hosts
     if args.alluxio_worker_hosts:
         alluxio_kwargs['worker_hosts'] = args.alluxio_worker_hosts
