@@ -85,14 +85,14 @@ def run_and_time_it(f):
 def setup_alluxio(args):
     fsspec.register_implementation("alluxio", AlluxioFileSystem, clobber=True)
     alluxio_kwargs = {}
-    if args.alluxio_etcd_host and args.alluxio_worker_hosts:
+    if args.alluxio_etcd_hosts and args.alluxio_worker_hosts:
         raise ValueError("Either etcd_host or worker_hosts should be provided, not both.")
     if args.alluxio_etcd_host:
-        alluxio_kwargs['etcd_host'] = args.alluxio_etcd_host
+        alluxio_kwargs['etcd_hosts'] = args.alluxio_etcd_hosts
     if args.alluxio_worker_hosts:
         alluxio_kwargs['worker_hosts'] = args.alluxio_worker_hosts
 
-    alluxio_kwargs['options'] = {"alluxio.worker.page.store.page.size": "100MB"}
+    alluxio_kwargs['options'] = {"alluxio.worker.page.store.page.size": "20MB"}
     if not alluxio_kwargs:
         raise ValueError("Either etcd_host or worker_hosts should be provided.")
 
@@ -104,7 +104,7 @@ def setup_alluxio(args):
 def run_xgboost_training(data_path: str, num_workers: int, cpus_per_worker: int, args):
     if args.use_alluxio:
         alluxio = setup_alluxio(args)
-        ds = data.read_parquet(data_path, filesystem = alluxio)
+        ds = data.read_parquet(data_path, filesystem=alluxio)
     else: 
         ds = data.read_parquet(data_path)
     # params = {
@@ -219,9 +219,9 @@ if __name__ == "__main__":
         help="Whether to use Alluxio instead of original ufs filesystem for data loading.",
     )
     parser.add_argument(
-        "--alluxio-etcd-host",
+        "--alluxio-etcd-hosts",
         default=None,
-        help="The ETCD host to connect to to get Alluxio workers connection info.",
+        help="The ETCD hosts to connect to to get Alluxio workers connection info.",
     )
     parser.add_argument(
         "--alluxio-worker-hosts",
